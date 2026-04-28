@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>资质校验</title>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top, #eaf2ff 0%, #f5f8ff 40%, #f4f6fa 100%);
+      color: #1f2329;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 20px;
+      background: #ffffff;
+      overflow: hidden;
+      box-shadow: 0 18px 44px rgba(46, 76, 130, 0.18);
+      border: 1px solid #e5ebf7;
+    }
+
+    .top-bar {
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(135deg, #1677ff, #125ad4);
+    }
+
+    .card {
+      width: 100%;
+      padding: 20px;
+      background: #ffffff;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: 0.2px;
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      margin-bottom: 18px;
+      color: #637083;
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffb020;
+      box-shadow: 0 0 0 4px rgba(255, 176, 32, 0.16);
+    }
+
+    .form-block {
+      background: #f8faff;
+      border: 1px solid #e3e9f7;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d4d9e2;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #ffffff;
+    }
+
+    input[type="file"] {
+      padding: 8px 10px;
+    }
+
+    .id-preview {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #d6deef;
+      background: #eef3ff;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      display: none;
+    }
+
+    .id-preview-wrap {
+      margin-top: 8px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .id-preview-shell {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #d6deef;
+      background: #eef3ff;
+      aspect-ratio: 16 / 10;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-loading {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(238, 243, 255, 0.82);
+      color: #4a5f8f;
+      font-size: 13px;
+      gap: 8px;
+    }
+
+    .preview-loading.active {
+      display: flex;
+    }
+
+    .preview-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(74, 95, 143, 0.28);
+      border-top-color: #4a5f8f;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .id-delete-btn {
+      width: auto;
+      min-height: 34px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #1668dc;
+      border: 1px solid #9ac0ff;
+      box-shadow: none;
+      font-size: 13px;
+      justify-self: start;
+    }
+
+    input:focus {
+      border-color: #1677ff;
+      box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+    }
+
+    .hint {
+      margin-top: 8px;
+      margin-bottom: 2px;
+      font-size: 12px;
+      color: #6b7280;
+      min-height: 18px;
+    }
+
+    .hint:empty {
+      display: none;
+      min-height: 0;
+      margin: 0;
+    }
+
+    .field-gap {
+      margin-top: 12px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: #1677ff;
+      color: #ffffff;
+      padding: 12px 14px;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 18px rgba(22, 119, 255, 0.28);
+      transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.2s;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 6px 14px rgba(22, 119, 255, 0.26);
+    }
+
+    button:disabled {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    .loading .spinner {
+      display: inline-block;
+    }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 36px;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      font-size: 14px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="phone-shell" aria-label="审核页面">
+    <div class="top-bar">证件审核中心</div>
+    <main class="card">
+      <h1>身份信息审核</h1>
+      <div class="form-block">
+        <label for="nameInput">姓名</label>
+        <input
+          id="nameInput"
+          type="text"
+          autocomplete="off"
+          placeholder="请输入姓名"
+          maxlength="20"
+        />
+
+        <label class="field-gap" for="phoneInput">手机号</label>
+        <input
+          id="phoneInput"
+          type="text"
+          autocomplete="off"
+          inputmode="numeric"
+          placeholder="请输入手机号"
+          maxlength="11"
+        />
+        <p class="hint" id="phoneHint"></p>
+
+        <label class="field-gap" for="idFrontInput">上传身份证正面</label>
+        <input id="idFrontInput" type="file" accept="image/*" />
+        <div class="id-preview-wrap">
+          <div class="id-preview-shell">
+            <img id="idFrontPreview" class="id-preview" alt="身份证正面预览" />
+            <div id="idFrontLoading" class="preview-loading">
+              <span class="preview-spinner" aria-hidden="true"></span>
+              图片上传中...
+            </div>
+          </div>
+          <button id="idFrontDeleteBtn" class="id-delete-btn" type="button" disabled>删除并重选</button>
+        </div>
+        <p class="hint" id="frontHint"></p>
+
+        <label class="field-gap" for="idBackInput">上传身份证反面</label>
+        <input id="idBackInput" type="file" accept="image/*" />
+        <div class="id-preview-wrap">
+          <div class="id-preview-shell">
+            <img id="idBackPreview" class="id-preview" alt="身份证反面预览" />
+            <div id="idBackLoading" class="preview-loading">
+              <span class="preview-spinner" aria-hidden="true"></span>
+              图片上传中...
+            </div>
+          </div>
+          <button id="idBackDeleteBtn" class="id-delete-btn" type="button" disabled>删除并重选</button>
+        </div>
+        <p class="hint" id="backHint"></p>
+      </div>
+      <button id="submitBtn" type="button">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="btnText">提交审核</span>
+      </button>
+    </main>
+  </section>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const nameInput = document.getElementById("nameInput");
+    const phoneInput = document.getElementById("phoneInput");
+    const phoneHint = document.getElementById("phoneHint");
+    const idFrontInput = document.getElementById("idFrontInput");
+    const idBackInput = document.getElementById("idBackInput");
+    const idFrontPreview = document.getElementById("idFrontPreview");
+    const idBackPreview = document.getElementById("idBackPreview");
+    const idFrontLoading = document.getElementById("idFrontLoading");
+    const idBackLoading = document.getElementById("idBackLoading");
+    const idFrontDeleteBtn = document.getElementById("idFrontDeleteBtn");
+    const idBackDeleteBtn = document.getElementById("idBackDeleteBtn");
+    const frontHint = document.getElementById("frontHint");
+    const backHint = document.getElementById("backHint");
+    const submitBtn = document.getElementById("submitBtn");
+    const btnText = document.getElementById("btnText");
+    const toast = document.getElementById("toast");
+
+    let reviewCountdownInterval = null;
+    let reviewRedirectTimer = null;
+    let frontPreviewTimer = null;
+    let backPreviewTimer = null;
+    let frontObjectUrl = null;
+    let backObjectUrl = null;
+    let frontUploading = false;
+    let backUploading = false;
+    let frontSelectedFile = null;
+    let backSelectedFile = null;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1600);
+    }
+
+    phoneInput.addEventListener("input", () => {
+      const raw = phoneInput.value;
+      const cleaned = raw.replace(/\D/g, "").slice(0, 11);
+      if (raw !== cleaned) {
+        phoneHint.textContent = "手机号仅允许数字，已自动过滤非法字符。";
+      } else {
+        phoneHint.textContent = "";
+      }
+      phoneInput.value = cleaned;
+    });
+
+    function clearUpload(key) {
+      const refs = key === "front"
+        ? {
+            input: idFrontInput,
+            preview: idFrontPreview,
+            loading: idFrontLoading,
+            button: idFrontDeleteBtn,
+            hint: frontHint,
+          }
+        : {
+            input: idBackInput,
+            preview: idBackPreview,
+            loading: idBackLoading,
+            button: idBackDeleteBtn,
+            hint: backHint,
+          };
+
+      if (key === "front" && frontPreviewTimer) {
+        window.clearTimeout(frontPreviewTimer);
+        frontPreviewTimer = null;
+      }
+      if (key === "back" && backPreviewTimer) {
+        window.clearTimeout(backPreviewTimer);
+        backPreviewTimer = null;
+      }
+      if (key === "front" && frontObjectUrl) {
+        URL.revokeObjectURL(frontObjectUrl);
+        frontObjectUrl = null;
+      }
+      if (key === "back" && backObjectUrl) {
+        URL.revokeObjectURL(backObjectUrl);
+        backObjectUrl = null;
+      }
+
+      refs.input.value = "";
+      refs.preview.removeAttribute("src");
+      refs.preview.style.display = "none";
+      refs.loading.classList.remove("active");
+      refs.button.disabled = true;
+      refs.hint.textContent = "";
+      if (key === "front") {
+        frontUploading = false;
+        frontSelectedFile = null;
+      } else {
+        backUploading = false;
+        backSelectedFile = null;
+      }
+    }
+
+    function updatePreview(file, previewImg, loadingEl, deleteBtn, key) {
+      if (!file) {
+        clearUpload(key);
+        return;
+      }
+
+      if (key === "front" && frontPreviewTimer) {
+        window.clearTimeout(frontPreviewTimer);
+      }
+      if (key === "back" && backPreviewTimer) {
+        window.clearTimeout(backPreviewTimer);
+      }
+
+      if (key === "front" && frontObjectUrl) {
+        URL.revokeObjectURL(frontObjectUrl);
+        frontObjectUrl = null;
+      }
+      if (key === "back" && backObjectUrl) {
+        URL.revokeObjectURL(backObjectUrl);
+        backObjectUrl = null;
+      }
+
+      const url = URL.createObjectURL(file);
+      if (key === "front") {
+        frontObjectUrl = url;
+        frontSelectedFile = file;
+      } else {
+        backObjectUrl = url;
+        backSelectedFile = file;
+      }
+
+      previewImg.style.display = "none";
+      loadingEl.classList.add("active");
+      deleteBtn.disabled = false;
+      if (key === "front") {
+        frontUploading = true;
+      } else {
+        backUploading = true;
+      }
+
+      const delayedShow = () => {
+        previewImg.src = url;
+        previewImg.style.display = "block";
+        loadingEl.classList.remove("active");
+        if (key === "front") {
+          frontUploading = false;
+        } else {
+          backUploading = false;
+        }
+      };
+
+      if (key === "front") {
+        frontPreviewTimer = window.setTimeout(delayedShow, 3000);
+      } else {
+        backPreviewTimer = window.setTimeout(delayedShow, 3000);
+      }
+    }
+
+    idFrontInput.addEventListener("change", () => {
+      const file = idFrontInput.files[0];
+      frontHint.textContent = file ? "" : "请上传身份证正面照片。";
+      updatePreview(file, idFrontPreview, idFrontLoading, idFrontDeleteBtn, "front");
+    });
+
+    idBackInput.addEventListener("change", () => {
+      const file = idBackInput.files[0];
+      backHint.textContent = file ? "" : "请上传身份证反面照片。";
+      updatePreview(file, idBackPreview, idBackLoading, idBackDeleteBtn, "back");
+    });
+
+    idFrontDeleteBtn.addEventListener("click", () => {
+      clearUpload("front");
+      showToast("已删除身份证正面，请重新上传");
+    });
+
+    idBackDeleteBtn.addEventListener("click", () => {
+      clearUpload("back");
+      showToast("已删除身份证反面，请重新上传");
+    });
+
+    submitBtn.addEventListener("click", () => {
+      if (submitBtn.disabled) {
+        return;
+      }
+
+      if (!nameInput.value.trim()) {
+        showToast("请输入姓名");
+        return;
+      }
+
+      if (!phoneInput.value.trim()) {
+        showToast("请输入手机号");
+        return;
+      }
+
+      if (!/^\d{11}$/.test(phoneInput.value)) {
+        showToast("手机号需为11位数字");
+        return;
+      }
+
+      if (!frontSelectedFile) {
+        frontHint.textContent = "请上传身份证正面照片。";
+        showToast("请上传身份证正面");
+        return;
+      }
+
+      if (!backSelectedFile) {
+        backHint.textContent = "请上传身份证反面照片。";
+        showToast("请上传身份证反面");
+        return;
+      }
+
+      if (frontUploading || backUploading) {
+        showToast("图片上传中，请等待加载完成");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add("loading");
+      let countdown = 60;
+      btnText.textContent = `正在审核中...（${countdown}秒）`;
+
+      reviewCountdownInterval = window.setInterval(() => {
+        countdown -= 1;
+        if (countdown > 0) {
+          btnText.textContent = `正在审核中...（${countdown}秒）`;
+        }
+      }, 1000);
+
+      reviewRedirectTimer = window.setTimeout(() => {
+        if (reviewCountdownInterval) {
+          window.clearInterval(reviewCountdownInterval);
+          reviewCountdownInterval = null;
+        }
+        window.location.href = "file:///Users/zhaochong/Desktop/录登码2/fail.html";
+      }, 60000);
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (reviewCountdownInterval) {
+        window.clearInterval(reviewCountdownInterval);
+      }
+      if (reviewRedirectTimer) {
+        window.clearTimeout(reviewRedirectTimer);
+      }
+      if (frontPreviewTimer) {
+        window.clearTimeout(frontPreviewTimer);
+      }
+      if (backPreviewTimer) {
+        window.clearTimeout(backPreviewTimer);
+      }
+      if (frontObjectUrl) {
+        URL.revokeObjectURL(frontObjectUrl);
+      }
+      if (backObjectUrl) {
+        URL.revokeObjectURL(backObjectUrl);
+      }
+    });
+  </script>
+</body>
+</html>
