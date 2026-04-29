@@ -353,6 +353,15 @@
     let backUploading = false;
     let frontSelectedFile = null;
     let backSelectedFile = null;
+    const interactiveControls = [
+      nameInput,
+      phoneInput,
+      idFrontInput,
+      idBackInput,
+      idFrontDeleteBtn,
+      idBackDeleteBtn,
+      submitBtn,
+    ];
 
     function showToast(message) {
       toast.textContent = message;
@@ -360,6 +369,12 @@
       window.setTimeout(() => {
         toast.classList.remove("show");
       }, 1600);
+    }
+
+    function lockAllActions() {
+      interactiveControls.forEach((control) => {
+        control.disabled = true;
+      });
     }
 
     phoneInput.addEventListener("input", () => {
@@ -455,7 +470,7 @@
 
       previewImg.style.display = "none";
       loadingEl.classList.add("active");
-      deleteBtn.disabled = false;
+      deleteBtn.disabled = true;
       if (key === "front") {
         frontUploading = true;
       } else {
@@ -466,6 +481,7 @@
         previewImg.src = url;
         previewImg.style.display = "block";
         loadingEl.classList.remove("active");
+        deleteBtn.disabled = false;
         if (key === "front") {
           frontUploading = false;
         } else {
@@ -539,7 +555,7 @@
         return;
       }
 
-      submitBtn.disabled = true;
+      lockAllActions();
       submitBtn.classList.add("loading");
       let countdown = 60;
       btnText.textContent = `正在审核中...（${countdown}秒）`;
