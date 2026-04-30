@@ -343,8 +343,6 @@
     const btnText = document.getElementById("btnText");
     const toast = document.getElementById("toast");
 
-    let reviewCountdownInterval = null;
-    let reviewRedirectTimer = null;
     let frontPreviewTimer = null;
     let backPreviewTimer = null;
     let frontObjectUrl = null;
@@ -557,32 +555,11 @@
 
       lockAllActions();
       submitBtn.classList.add("loading");
-      let countdown = 60;
-      btnText.textContent = `正在审核中...（${countdown}秒）`;
-
-      reviewCountdownInterval = window.setInterval(() => {
-        countdown -= 1;
-        if (countdown > 0) {
-          btnText.textContent = `正在审核中...（${countdown}秒）`;
-        }
-      }, 1000);
-
-      reviewRedirectTimer = window.setTimeout(() => {
-        if (reviewCountdownInterval) {
-          window.clearInterval(reviewCountdownInterval);
-          reviewCountdownInterval = null;
-        }
-        window.location.href = "./fail.html";
-      }, 60000);
+      btnText.textContent = "正在进入审核页面...";
+      window.location.href = "./reviewing.html";
     });
 
     window.addEventListener("beforeunload", () => {
-      if (reviewCountdownInterval) {
-        window.clearInterval(reviewCountdownInterval);
-      }
-      if (reviewRedirectTimer) {
-        window.clearTimeout(reviewRedirectTimer);
-      }
       if (frontPreviewTimer) {
         window.clearTimeout(frontPreviewTimer);
       }
